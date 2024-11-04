@@ -1,0 +1,21 @@
+<div class="filter">
+  <label for="category">Filter by Category: </label>
+  <select
+    id="category"
+    [(ngModel)]="selectedCategory"
+    (change)="filterByCategory()"
+  >
+    <option *ngFor="let category of categories" [value]="category">
+      {{ category }}
+    </option>
+  </select>
+</div>
+
+<div class="product-list">
+  <div *ngFor="let product of filteredProducts" class="product-card">
+    <img [src]="product.image" alt="{{ product.title }}" />
+    <h3>{{ product.title }}</h3>
+    <p>{{ product.price | currency }}</p>
+    <button [routerLink]="['/product', product.id]">View Details</button>
+  </div>
+</div>
