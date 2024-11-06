@@ -2,8 +2,8 @@
   <label for="category">Filter by Category: </label>
   <select
     id="category"
-    [(ngModel)]="selectedCategory"
-    (change)="filterByCategory()"
+    [value]="(selectedCategory$ | async) || 'All'"
+    (change)="onCategoryChange($event)"
   >
     <option *ngFor="let category of categories" [value]="category">
       {{ category }}
@@ -12,8 +12,8 @@
 </div>
 
 <div class="product-list">
-  <div *ngFor="let product of filteredProducts" class="product-card">
-    <img [src]="product.image" alt="{{ product.title }}" />
+  <div *ngFor="let product of filteredProducts$ | async" class="product-card">
+    <img [src]="product.image" [alt]="product.title" />
     <h3>{{ product.title }}</h3>
     <p>{{ product.price | currency }}</p>
     <button [routerLink]="['/product', product.id]">View Details</button>

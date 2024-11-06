@@ -1,14 +1,18 @@
-<div *ngIf="product" class="product-detail">
+<div *ngIf="product$ | async as product" class="product-detail">
   <h2 class="product-title">{{ product.title }}</h2>
   <img class="product-image" [src]="product.image" alt="{{ product.title }}" />
 
   <div class="product-info">
     <p class="product-price">{{ product.price | currency }}</p>
     <p class="product-description">{{ product.description }}</p>
+
     <button class="back" (click)="goBack()">Back</button>
+
     <button class="add-to-cart" (click)="addToCart()">Add to Cart</button>
 
     <!-- Display a message when the product is added to the cart -->
-    <p *ngIf="productAdded" class="cart-message">Product added to cart!</p>
+    <p *ngIf="productAdded$ | async" class="cart-message">
+      Product added to cart!
+    </p>
   </div>
 </div>

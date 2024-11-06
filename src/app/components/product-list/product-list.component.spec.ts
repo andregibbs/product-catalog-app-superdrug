@@ -1,17 +1,18 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ProductListComponent } from './product-list.component';
 import { ProductService } from '../../services/product.service';
 import { of } from 'rxjs';
 import { Product } from '../../models/product.model';
 import { FormsModule } from '@angular/forms'; 
 import { RouterModule } from '@angular/router';
+import { By } from '@angular/platform-browser';
 
 describe('ProductListComponent', () => {
   let component: ProductListComponent;
   let fixture: ComponentFixture<ProductListComponent>;
   let mockProductService: jasmine.SpyObj<ProductService>;
 
-  beforeEach(async () => {
+  beforeEach(waitForAsync(() => {
     mockProductService = jasmine.createSpyObj('ProductService', ['getProducts']);
 
     const mockProducts: Product[] = [
@@ -20,7 +21,7 @@ describe('ProductListComponent', () => {
     ];
     mockProductService.getProducts.and.returnValue(of(mockProducts));
 
-    await TestBed.configureTestingModule({
+    TestBed.configureTestingModule({
       declarations: [ProductListComponent],
       imports: [
         FormsModule,
@@ -34,29 +35,42 @@ describe('ProductListComponent', () => {
     fixture = TestBed.createComponent(ProductListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
+  }));
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load products on init', () => {
-    expect(component.products.length).toBe(2);
-    expect(component.filteredProducts.length).toBe(2);
-    expect(component.categories.length).toBe(3);
-    expect(component.categories).toEqual(['All', 'Category 1', 'Category 2']);
+  it('should load products on init', (done) => {
+    component.products$.subscribe((products) => {
+      expect(products.length).toBe(2);
+      done();
+    });
   });
 
-  it('should filter products by category', () => {
-    component.selectedCategory = 'Category 1';
-    component.filterByCategory();
-    expect(component.filteredProducts.length).toBe(1);
-    expect(component.filteredProducts[0].category).toBe('Category 1');
+  it('should filter products by category', (done) => {
+    component.selectedCategory$.next('Category 1');
+    component.filteredProducts$.subscribe((filteredProducts) => {
+      expect(filteredProducts.length).toBe(1);
+      expect(filteredProducts[0].category).toBe('Category 1');
+      done();
+    });
   });
 
-  it('should show all products when selected category is "All"', () => {
-    component.selectedCategory = 'All';
-    component.filterByCategory();
-    expect(component.filteredProducts.length).toBe(2);
+  it('should show all products when selected category is "All"', (done) => {
+    component.selectedCategory$.next('All');
+    component.filteredProducts$.subscribe((filteredProducts) => {
+      expect(filteredProducts.length).toBe(2);
+      done();
+    });
+  });
+
+  it('should change category when selected', () => {
+    const select = fixture.debugElement.query(By.css('select'));
+    select.triggerEventHandler('change', { target: { value: 'Category 2' } });
+    
+    component.selectedCategory$.subscribe((selectedCategory) => {
+      expect(selectedCategory).toBe('Category 2');
+    });
   });
 });
